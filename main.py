@@ -177,7 +177,7 @@ def next_page(update, context):
     keyboard = keyboard_helper(update.effective_user.id, context.user_data['status'], page) + MAIN_MENU
     query.edit_message_text('בחר משימה כדי לבצע פעולות:',
     reply_markup=InlineKeyboardMarkup(keyboard))
-    return CHOOSE_ACTION
+    return CHOOSE_TASK
 
 def prev_page(update, context):
     query = update.callback_query
@@ -186,7 +186,7 @@ def prev_page(update, context):
     keyboard = keyboard_helper(update.effective_user.id, context.user_data['status'], page) + MAIN_MENU
     query.edit_message_text('בחר משימה כדי לבצע פעולות:',
     reply_markup=InlineKeyboardMarkup(keyboard))
-    return CHOOSE_ACTION
+    return CHOOSE_TASK
 
 def main_menu(update, context):
     query = update.callback_query
