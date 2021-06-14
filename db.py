@@ -41,7 +41,7 @@ def task_list(id: int, status: list, page: int=1) -> list:
 
 @db_session
 def task_count(id: int, status: list) -> int:
-    return count(t for t in Todo if t.done in status)
+    return count(t for t in Todo if t.user.id == id and t.done in status)
 
 @db_session
 def get_task(id: int) -> tuple:
