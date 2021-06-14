@@ -1,4 +1,4 @@
-from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import *
 from helpers import *
 import logging
@@ -19,7 +19,7 @@ InlineKeyboardButton('משימות שלא בוצעו', callback_data='not_done')
 MAIN_MENU = [[InlineKeyboardButton('תפריט ראשי', callback_data='main_menu')]]
 
 
-def start(update, context):
+def start(update: Update, context: CallbackContext) -> None:
     if db.is_new_user(update.effective_user.id):
         db.add_user(update.effective_user.id)
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
@@ -28,20 +28,20 @@ def start(update, context):
     update.message.reply_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
     reply_markup=InlineKeyboardMarkup(keyboard))
 
-def add(update, context):
+def add(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     query.edit_message_text('שלח לי את המשימה שברצונך להוסיף:\n\
     לביטול שלח /cancel .')
     return GET_TASK
 
-def get_task(update, context):
+def get_task(update: Update, context: CallbackContext) -> None:
     db.add_task(id=update.effective_user.id, task=update.message.text)
     update.message.reply_text('המשימה נוספה בהצלחה!',
     reply_markup=InlineKeyboardMarkup(KEYBOARD))
     return END
 
-def all_tasks(update, context):
+def all_tasks(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     context.user_data['status'] = [0, 1]
@@ -50,7 +50,7 @@ def all_tasks(update, context):
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_TASK
 
-def not_done_tasks(update, context):
+def not_done_tasks(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     context.user_data['status'] = [0]
@@ -63,7 +63,7 @@ def not_done_tasks(update, context):
         query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
         reply_markup=InlineKeyboardMarkup(KEYBOARD))
 
-def done_tasks(update, context):
+def done_tasks(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     context.user_data['status'] = [1]
@@ -76,7 +76,7 @@ def done_tasks(update, context):
         query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
         reply_markup=InlineKeyboardMarkup(KEYBOARD))
 
-def choose_task(update, context):
+def choose_task(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     context.user_data['task_id'] = int(query.data)
@@ -91,7 +91,7 @@ def choose_task(update, context):
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_ACTION
 
-def change_status(update, context):
+def change_status(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     db.change_status(context.user_data['task_id'], int(query.data[-1]))
@@ -111,7 +111,7 @@ def change_status(update, context):
             reply_markup=InlineKeyboardMarkup(KEYBOARD))
             return END
 
-def delete(update, context):
+def delete(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     db.delete(context.user_data['task_id'])
@@ -126,20 +126,20 @@ def delete(update, context):
         reply_markup=InlineKeyboardMarkup(keyboard))
         return END
 
-def edit(update, context):
+def edit(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     query.edit_message_text('שלח את הטקסט החדש:')
     return EDIT_TASK
 
-def edit_task(update, context):
+def edit_task(update: Update, context: CallbackContext) -> None:
     db.edit_task(context.user_data['task_id'], update.message.text)
     keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
     update.message.reply_text('המשימה נערכה בהצלחה!',
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_TASK
 
-def next_page(update, context):
+def next_page(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     page = int(query.data[5:])
@@ -148,7 +148,7 @@ def next_page(update, context):
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_TASK
 
-def prev_page(update, context):
+def prev_page(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     page = int(query.data[5:])
@@ -157,7 +157,7 @@ def prev_page(update, context):
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_TASK
 
-def main_menu(update, context):
+def main_menu(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
@@ -167,7 +167,7 @@ def main_menu(update, context):
     reply_markup=InlineKeyboardMarkup(keyboard))
     return END
 
-def cancel(update, context):
+def cancel(update: Update, context: CallbackContext) -> None:
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
     if db.tasks_exists(update.effective_user.id, [0, 1]):
         keyboard = KEYBOARD
@@ -213,8 +213,6 @@ def main():
 
 if __name__ == "__main__":
   main()
-
-
 
 
 #by t.me/yehuda100

@@ -2,11 +2,11 @@ from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 import db
 
 
-def bold(text):
+def bold(text: str) -> str:
     return '<b>' + text + '</b>'
 
 
-def keyboard_helper(id, status, page=1):
+def keyboard_helper(id: int, status: list, page: int=1) -> list:
     indicator = {0: '✖️', 1: '✔️'}
     tasks = db.task_list(id, status, page)
     keyboard = [[InlineKeyboardButton(indicator[t[1]] + "‏  " + t[2][:25], callback_data=t[0])]for t in tasks]
@@ -20,3 +20,6 @@ def keyboard_helper(id, status, page=1):
             keyboard.append([InlineKeyboardButton('הקודם', callback_data='prev=' + str(page - 1)),
             InlineKeyboardButton('הבא', callback_data='next=' + str(page + 1))])
     return keyboard
+
+
+#by t.me/yehuda100
