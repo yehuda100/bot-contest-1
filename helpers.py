@@ -8,12 +8,8 @@ def bold(text):
 
 def keyboard_helper(id, status, page=1):
     indicator = {0: '✖️', 1: '✔️'}
-    if status == -1:
-        status = [0, 1]
-    else:
-        status = [status]
     tasks = db.task_list(id, status, page)
-    keyboard = [[InlineKeyboardButton(indicator[t[1]] + "‏‏‏  " + t[2][:25], callback_data=t[0])]for t in tasks]
+    keyboard = [[InlineKeyboardButton(indicator[t[1]] + "‏  " + t[2][:25], callback_data=t[0])]for t in tasks]
     if page == 1:
         if db.task_count(id, status) > page * 10:
             keyboard.append([InlineKeyboardButton('הבא', callback_data='next=' + str(page + 1))])

@@ -24,20 +24,12 @@ def add_user(id):
     Users(id=id)
 
 @db_session
-def user_have_tasks(id):
-    return Todo.exists(lambda t: t.user.id == id)
-
-@db_session
 def add_task(id, task, done=0):
     Todo(task=task, user=id, done=done)
 
 @db_session
-def done_tasks_exists(id):
-    return Todo.exists(lambda t: t.user.id == id and t.done == 1)
-
-@db_session
-def not_done_tasks_exists(id):
-    return Todo.exists(lambda t: t.user.id == id and t.done == 0)
+def tasks_exists(id, status):
+    return Todo.exists(lambda t: t.user.id == id and t.done in status)
 
 @db_session
 def task_list(id, status, page=1):

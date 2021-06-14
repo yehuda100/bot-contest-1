@@ -23,7 +23,7 @@ def start(update, context):
     if db.is_new_user(update.effective_user.id):
         db.add_user(update.effective_user.id)
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
-    if db.user_have_tasks(update.effective_user.id):
+    if db.tasks_exists(update.effective_user.id, [0, 1]):
         keyboard = KEYBOARD
     update.message.reply_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
     reply_markup=InlineKeyboardMarkup(keyboard))
@@ -44,7 +44,7 @@ def get_task(update, context):
 def all_tasks(update, context):
     query = update.callback_query
     query.answer()
-    context.user_data['status'] = -1
+    context.user_data['status'] = [0, 1]
     keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
     query.edit_message_text('בחר משימה כדי לבצע פעולות:',
     reply_markup=InlineKeyboardMarkup(keyboard))
@@ -53,8 +53,8 @@ def all_tasks(update, context):
 def not_done_tasks(update, context):
     query = update.callback_query
     query.answer()
-    context.user_data['status'] = 0
-    if db.not_done_tasks_exists(update.effective_user.id):
+    context.user_data['status'] = [0]
+    if db.tasks_exists(update.effective_user.id, [0]):
         keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
         query.edit_message_text('בחר משימה כדי לבצע פעולות:',
         reply_markup=InlineKeyboardMarkup(keyboard))
@@ -66,8 +66,8 @@ def not_done_tasks(update, context):
 def done_tasks(update, context):
     query = update.callback_query
     query.answer()
-    context.user_data['status'] = 1
-    if db.done_tasks_exists(update.effective_user.id):
+    context.user_data['status'] = [1]
+    if db.tasks_exists(update.effective_user.id, [1]):
         keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
         query.edit_message_text('בחר משימה כדי לבצע פעולות:',
         reply_markup=InlineKeyboardMarkup(keyboard))
@@ -95,23 +95,13 @@ def change_status(update, context):
     query = update.callback_query
     query.answer()
     db.change_status(context.user_data['task_id'], int(query.data[-1]))
-    if context.user_data['status'] == -1:
+    if context.user_data['status'] == [0, 1]:
         keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
         query.edit_message_text('בחר משימה כדי לבצע פעולות:',
         reply_markup=InlineKeyboardMarkup(keyboard))
         return CHOOSE_TASK
-    elif context.user_data['status'] == 0:
-        if db.not_done_tasks_exists(update.effective_user.id):
-            keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
-            query.edit_message_text('בחר משימה כדי לבצע פעולות:',
-            reply_markup=InlineKeyboardMarkup(keyboard))
-            return CHOOSE_TASK
-        else:
-            query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
-            reply_markup=InlineKeyboardMarkup(KEYBOARD))
-            return END
-    elif context.user_data['status'] == 1:
-        if db.done_tasks_exists(update.effective_user.id):
+    else:
+        if db.tasks_exists(update.effective_user.id, context.user_data['status']):
             keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
             query.edit_message_text('בחר משימה כדי לבצע פעולות:',
             reply_markup=InlineKeyboardMarkup(keyboard))
@@ -125,37 +115,16 @@ def delete(update, context):
     query = update.callback_query
     query.answer()
     db.delete(context.user_data['task_id'])
-    if context.user_data['status'] == -1:
-        if db.user_have_tasks(update.effective_user.id):
-            keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
-            query.edit_message_text('בחר משימה כדי לבצע פעולות:',
-            reply_markup=InlineKeyboardMarkup(keyboard))
-            return CHOOSE_TASK
-        else:
-            keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
-            query.edit_message_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
-            reply_markup=InlineKeyboardMarkup(keyboard))
-            return END
-    elif context.user_data['status'] == 0:
-        if db.not_done_tasks_exists(update.effective_user.id):
-            keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
-            query.edit_message_text('בחר משימה כדי לבצע פעולות:',
-            reply_markup=InlineKeyboardMarkup(keyboard))
-            return CHOOSE_TASK
-        else:
-            query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
-            reply_markup=InlineKeyboardMarkup(KEYBOARD))
-            return END
-    elif context.user_data['status'] == 1:
-        if db.done_tasks_exists(update.effective_user.id):
-            keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
-            query.edit_message_text('בחר משימה כדי לבצע פעולות:',
-            reply_markup=InlineKeyboardMarkup(keyboard))
-            return CHOOSE_TASK
-        else:
-            query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
-            reply_markup=InlineKeyboardMarkup(KEYBOARD))
-            return END
+    if db.tasks_exists(update.effective_user.id, context.user_data['status']):
+        keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
+        query.edit_message_text('המשימה נמחקה בהצלחה!\nבחר משימה כדי לבצע פעולות:',
+        reply_markup=InlineKeyboardMarkup(keyboard))
+        return CHOOSE_TASK
+    else:
+        keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
+        query.edit_message_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
+        reply_markup=InlineKeyboardMarkup(keyboard))
+        return END
 
 def edit(update, context):
     query = update.callback_query
@@ -192,7 +161,7 @@ def main_menu(update, context):
     query = update.callback_query
     query.answer()
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
-    if db.user_have_tasks(update.effective_user.id):
+    if db.tasks_exists(update.effective_user.id, [0, 1]):
         keyboard = KEYBOARD
     query.edit_message_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
     reply_markup=InlineKeyboardMarkup(keyboard))
@@ -200,7 +169,7 @@ def main_menu(update, context):
 
 def cancel(update, context):
     keyboard = [[InlineKeyboardButton('להוסיף משימה', callback_data='add')]]
-    if db.user_have_tasks(update.effective_user.id):
+    if db.tasks_exists(update.effective_user.id, [0, 1]):
         keyboard = KEYBOARD
     update.message.reply_text("שלום {} מה תרצה שנעשה היום?".format(update.effective_user.first_name),
     reply_markup=InlineKeyboardMarkup(keyboard))
