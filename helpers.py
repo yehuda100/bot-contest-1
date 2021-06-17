@@ -1,9 +1,10 @@
 from telegram import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 import db
+import html
 
 
 def bold(text: str) -> str:
-    return '<b>' + text.replace('<', '\\<').replace('>', '\\>') + '</b>'
+    return '<b>' + html.escape(text) + '</b>'
 
 
 def keyboard_helper(id: int, status: list, page: int=1) -> list:
