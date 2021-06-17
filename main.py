@@ -210,7 +210,7 @@ def main():
     CommandHandler('cancel', cancel)], allow_reentry=True))
 
     updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
+                          port=PORT,
                           url_path=os.environ.get(['TOKEN']),
                           webhook_url=os.environ.get(['URL']) + os.environ.get(['TOKEN']))
     updater.idle()
