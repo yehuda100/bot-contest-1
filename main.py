@@ -185,7 +185,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     defaults = Defaults(parse_mode=ParseMode.HTML)
-    updater = Updater(os.environ.get(['TOKEN']), use_context=True, defaults=defaults)
+    updater = Updater(os.environ.get('TOKEN'), use_context=True, defaults=defaults)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
@@ -211,8 +211,8 @@ def main():
 
     updater.start_webhook(listen="0.0.0.0",
                           port=PORT,
-                          url_path=os.environ.get(['TOKEN']),
-                          webhook_url=os.environ.get(['URL']) + os.environ.get(['TOKEN']))
+                          url_path=os.environ.get('TOKEN'),
+                          webhook_url=os.environ.get('URL') + os.environ.get('TOKEN'))
     updater.idle()
 
 if __name__ == "__main__":
