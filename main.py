@@ -1,10 +1,13 @@
-from telegram import Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Bot, Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import *
 from helpers import *
 import logging
 import bot_token
 import db
+import os
 
+
+PORT = int(os.environ.get('PORT', '8443'))
 
 GET_TASK = 1
 CHOOSE_TASK, CHOOSE_ACTION, EDIT_TASK = 10, 11, 12
@@ -207,8 +210,10 @@ def main():
     CallbackQueryHandler(main_menu, pattern='main_menu'),
     CommandHandler('cancel', cancel)], allow_reentry=True))
 
-
-    updater.start_polling()
+    updater.start_webhook(listen="0.0.0.0",
+                          port=int(PORT),
+                          url_path=bot_token.TOKEN,
+                          webhook_url=bot_token.URL + bot_token.TOKEN)
     updater.idle()
 
 if __name__ == "__main__":
