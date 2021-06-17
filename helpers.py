@@ -3,7 +3,7 @@ import db
 
 
 def bold(text: str) -> str:
-    return '<b>' + text + '</b>'
+    return '<b>' + text + '</b>'.replace('<', '\<').replace('>', '\>')
 
 
 def keyboard_helper(id: int, status: list, page: int=1) -> list:
