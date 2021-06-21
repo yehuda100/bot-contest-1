@@ -3,10 +3,8 @@ from telegram.ext import *
 from helpers import *
 import logging
 import db
-import os
+import bot_token
 
-
-PORT = int(os.environ.get('PORT', '8443'))
 
 GET_TASK = 1
 CHOOSE_TASK, CHOOSE_ACTION, EDIT_TASK = 10, 11, 12
@@ -185,7 +183,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     defaults = Defaults(parse_mode=ParseMode.HTML)
-    updater = Updater(os.environ.get('TOKEN'), use_context=True, defaults=defaults)
+    updater = Updater(bot_token.TOKEN, use_context=True, defaults=defaults)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
@@ -209,11 +207,15 @@ def main():
     CallbackQueryHandler(main_menu, pattern='main_menu'),
     CommandHandler('cancel', cancel)], allow_reentry=True))
 
-    updater.start_webhook(listen="0.0.0.0",
-                          port=PORT,
-                          url_path=os.environ.get('TOKEN'),
-                          webhook_url=os.environ.get('URL') + os.environ.get('TOKEN'))
+
+    updater.start_webhook(listen="127.0.0.1",
+                          port=8000,
+                          url_path=bot_token.TOKEN,
+                          webhook_url=bot_token.URL + bot_token.TOKEN,
+                          cert=bot_token.CERT)
     updater.idle()
+
+
 
 if __name__ == "__main__":
   main()
