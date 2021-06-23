@@ -16,12 +16,16 @@ class Todo(db.Entity):
 
 
 @db_session
-def is_new_user(id: int):
+def is_new_user(id: int) -> bool:
     return not Users.exists(id=id)
 
 @db_session
-def add_user(id: int):
+def add_user(id: int) -> None:
     Users(id=id)
+
+@db_session
+def all_users() -> list:
+    return list(select(u.id for u in Users))
 
 @db_session
 def add_task(id: int, task: str, done: int=0) -> None:

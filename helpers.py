@@ -6,6 +6,9 @@ import html
 def bold(text: str) -> str:
     return '<b>' + html.escape(text) + '</b>'
 
+def link(text: str, link: str) -> str:
+    return '<a href="{}">'.format(link) + html.escape(text) + '</a>'
+
 
 def keyboard_helper(id: int, status: list, page: int=1) -> list:
     indicator = {0: '✖️', 1: '✔️'}

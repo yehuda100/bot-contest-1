@@ -175,6 +175,12 @@ def cancel(update: Update, context: CallbackContext) -> None:
     reply_markup=InlineKeyboardMarkup(keyboard))
     return END
 
+def admin(update: Update, context: CallbackContext) -> None:
+    all_users = []
+    for user in db.all_users():
+        all_users.append(link(str(user), 'tg://user?id={}'.format(user)))
+    update.message.reply_text('{} {}\n\n'.format(bold('Users count:'), len(all_users)) + '\n'.join(all_users))
+
 
 def main():
 
@@ -187,6 +193,8 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(CommandHandler('admin', admin, Filters.chat([258871997])))
+
 
     dp.add_handler(ConversationHandler(
     entry_points=[CallbackQueryHandler(add, pattern='add')],
