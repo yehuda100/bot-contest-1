@@ -87,7 +87,7 @@ def choose_task(update: Update, context: CallbackContext) -> None:
         keyboard = [[InlineKeyboardButton('סמן כבוצע', callback_data='change=1')]] + keyboard
     else:
         keyboard = [[InlineKeyboardButton('סמן כלא בוצע', callback_data='change=0')]] + keyboard
-    query.edit_message_text('{}\nבחר מה ברצונך לבצע:'.format(bold(task[0])),
+    query.edit_message_text('{}\n\nבחר מה ברצונך לבצע:'.format(bold(task[0])),
     reply_markup=InlineKeyboardMarkup(keyboard))
     return CHOOSE_ACTION
 
@@ -188,8 +188,9 @@ def main():
                     level=logging.INFO)
     logger = logging.getLogger(__name__)
 
+    persistence = PicklePersistence(filename='TODO_bot', store_callback_data=True)
     defaults = Defaults(parse_mode=ParseMode.HTML)
-    updater = Updater(bot_token.TOKEN, use_context=True, defaults=defaults)
+    updater = Updater(bot_token.TOKEN, persistence=persistence, use_context=True, defaults=defaults)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
@@ -199,7 +200,8 @@ def main():
     dp.add_handler(ConversationHandler(
     entry_points=[CallbackQueryHandler(add, pattern='add')],
     states={GET_TASK: [MessageHandler(Filters.text & ~Filters.command, get_task)]},
-    fallbacks=[CommandHandler('cancel', cancel)]))
+    fallbacks=[CommandHandler('cancel', cancel)],
+    persistent=True, name='add_task'))
 
     dp.add_handler(ConversationHandler(
     entry_points=[CallbackQueryHandler(all_tasks, pattern='all'),
@@ -213,7 +215,8 @@ def main():
     fallbacks=[CallbackQueryHandler(next_page, pattern='^next=[0-9]+$'),
     CallbackQueryHandler(prev_page, pattern='^prev=[0-9]+$'),
     CallbackQueryHandler(main_menu, pattern='main_menu'),
-    CommandHandler('cancel', cancel)], allow_reentry=True))
+    CommandHandler('cancel', cancel)],
+    allow_reentry=True, persistent=True, name='tasks_choice'))
 
 
     updater.start_webhook(listen="127.0.0.1",
