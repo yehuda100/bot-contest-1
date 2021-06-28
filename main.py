@@ -81,8 +81,9 @@ def choose_task(update: Update, context: CallbackContext) -> None:
     query.answer()
     context.user_data['task_id'] = int(query.data)
     task = db.get_task(int(query.data))
-    keyboard = [[InlineKeyboardButton('מחק משימה', callback_data='delete')],
-    [InlineKeyboardButton('ערוך משימה', callback_data='edit')]]
+    keyboard = [[InlineKeyboardButton('מחק משימה', callback_data='delete'),
+    InlineKeyboardButton('ערוך משימה', callback_data='edit')],
+    [InlineKeyboardButton('חזור', callback_data='back')]]
     if task[1] == 0:
         keyboard = [[InlineKeyboardButton('סמן כבוצע', callback_data='change=1')]] + keyboard
     else:
@@ -110,6 +111,14 @@ def change_status(update: Update, context: CallbackContext) -> None:
             query.edit_message_text('לא נמצאו משימות מתאימות, שנה סטטוס של משימות קיימות כדי שיוכלו להתאים.',
             reply_markup=InlineKeyboardMarkup(KEYBOARD))
             return END
+
+def back(update: Update, context: CallbackContext) -> None:
+    query = update.callback_query
+    query.answer()
+    keyboard = keyboard_helper(update.effective_user.id, context.user_data['status']) + MAIN_MENU
+    query.edit_message_text('בחר משימה כדי לבצע פעולות:',
+    reply_markup=InlineKeyboardMarkup(keyboard))
+    return CHOOSE_TASK
 
 def delete(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
@@ -210,7 +219,8 @@ def main():
     states={CHOOSE_TASK: [CallbackQueryHandler(choose_task, pattern='^[0-9]+$')],
     CHOOSE_ACTION: [CallbackQueryHandler(change_status, pattern='^change=[0-1]$'),
     CallbackQueryHandler(delete, pattern='^delete$'),
-    CallbackQueryHandler(edit, pattern='^edit$')],
+    CallbackQueryHandler(edit, pattern='^edit$'),
+    CallbackQueryHandler(back, pattern='^back$')],
     EDIT_TASK: [MessageHandler(Filters.text & ~Filters.command, edit_task)]},
     fallbacks=[CallbackQueryHandler(next_page, pattern='^next=[0-9]+$'),
     CallbackQueryHandler(prev_page, pattern='^prev=[0-9]+$'),
