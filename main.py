@@ -222,8 +222,7 @@ def main():
     updater.start_webhook(listen="127.0.0.1",
                           port=8000,
                           url_path=bot_token.TOKEN,
-                          webhook_url=bot_token.URL + bot_token.TOKEN,
-                          cert=bot_token.CERT)
+                          webhook_url=bot_token.URL + bot_token.TOKEN)
     updater.idle()
 
 
